@@ -7,12 +7,16 @@ $old_access_token='A=KdfjadlskfjSDFGG.ertklsioerkjhSDFGkjlhasdfik345k34897SDFgkl
 $old_token_secret='o2345w980945353478594867g3454l45lk324wrd';
 $oauth_session_handle='kj435kj.lkjlkj.ksdfgdfi44.dsfgkoert908435lkjglgs';
 
+// Refresh the access token using HTTP GET and HMAC-SHA1 signature
 $retarr = refresh_access_token(OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET,
                                $old_access_token, $old_token_secret,
-                               $oauth_session_handle);
-if (! empty($retarr) && $retarr['oauth_token']) {
-  print "Use oauth_token as the token for all of your API calls:\n" .
-    rfc3986_decode($retarr['oauth_token']) . "\n";
+                               $oauth_session_handle, false, true, true);
+if (! empty($retarr)) {
+  list($info, $headers, $body, $body_parsed) = $retarr;
+  if ($info['http_code'] == 200 && !empty($body)) {
+      print "Use oauth_token as the token for all of your API calls:\n" .
+          rfc3986_decode($body_parsed['oauth_token']) . "\n";
+  }
 }
 
 exit(0);
@@ -28,9 +32,10 @@ exit(0);
  * @param bool $useHmacSha1Sig use HMAC-SHA1 signature (default false)
  * @return response string with token or empty array on error
  */
-function refresh_access_token($consumer_key, $consumer_secret, $old_access_token, $old_token_secret, $oauth_session_handle, $usePost=false, $useHmacSha1Sig=false)
+function refresh_access_token($consumer_key, $consumer_secret, $old_access_token, $old_token_secret, $oauth_session_handle, $usePost=false, $useHmacSha1Sig=true, $passOAuthInHeader=true)
 {
   $retarr = array();  // return value
+  $response = array();
 
   $url = 'https://api.login.yahoo.com/oauth/v2/get_token';
   $params['oauth_version'] = '1.0';
@@ -52,30 +57,39 @@ function refresh_access_token($consumer_key, $consumer_secret, $old_access_token
       oauth_compute_plaintext_sig($consumer_secret, $old_token_secret);
   }
 
-  // encode, sort, and build query parameter string
-  $query_parameter_string = oauth_http_build_query($params);
+  // Pass OAuth credentials in a separate header or in the query string
+  if ($passOAuthInHeader) {
+    $query_parameter_string = oauth_http_build_query($params, true);
+    $header = build_oauth_header($params, "yahooapis.com");
+    $headers[] = $header;
+  } else {
+    $query_parameter_string = oauth_http_build_query($params);
+  }
 
   // POST or GET the request
   if ($usePost) {
     $request_url = $url;
-    logit("refresh_access_token:INFO:request_url:$request_url");
-    logit("refresh_access_token:INFO:post_body:$query_parameter_string");
+    logit("refacctok:INFO:request_url:$request_url");
+    logit("refacctok:INFO:post_body:$query_parameter_string");
     $headers[] = 'Content-Type: application/x-www-form-urlencoded';
     $response = do_post($request_url, $query_parameter_string, 443, $headers);
   } else {
-    $request_url = $url . '?' . $query_parameter_string;
-    logit("refresh_access_token:INFO:request_url:$request_url");
-    $response = do_get($request_url, 443);
+    $request_url = $url . ($query_parameter_string ?
+                           ('?' . $query_parameter_string) : '' );
+    logit("refacctok:INFO:request_url:$request_url");
+    $response = do_get($request_url, 443, $headers);
   }
 
   // extract successful response
   if (! empty($response)) {
     list($info, $header, $body) = $response;
-    $retarr = oauth_parse_str($body);
-    if (! empty($retarr)) {
-      logit("refresh_access_token:INFO:response:");
-      print_r($retarr);
+    $body_parsed = oauth_parse_str($body);
+    if (! empty($body_parsed)) {
+      logit("getacctok:INFO:response_body_parsed:");
+      print_r($body_parsed);
     }
+    $retarr = $response;
+    $retarr[] = $body_parsed;
   }
 
   return $retarr;

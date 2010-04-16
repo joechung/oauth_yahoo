@@ -10,7 +10,7 @@
  * according to the OAuth spec, or an empty string if params is empty.
  * @link http://oauth.net/core/1.0/#rfc.section.9.1.1
  */
-function oauth_http_build_query($params)
+function oauth_http_build_query($params, $excludeOauthParams=false)
 {
   $query_string = '';
   if (! empty($params)) {
@@ -27,6 +27,9 @@ function oauth_http_build_query($params)
     // Turn params array into an array of "key=value" strings
     $kvpairs = array();
     foreach ($params as $k => $v) {
+      if ($excludeOauthParams && substr($k, 0, 5) == 'oauth') {
+        continue;
+      }
       if (is_array($v)) {
         // If two or more parameters share the same name,
         // they are sorted by their value. OAuth Spec: 9.1.1 (1)
@@ -90,9 +93,9 @@ function oauth_parse_str($query_string)
  * @param array $params an array of query parameters
  * @return string encoded for insertion into HTTP header of API call
  */
-function build_oauth_header($params)
+function build_oauth_header($params, $realm='')
 {
-  $header = 'Authorization: OAuth realm="yahooapis.com"';
+  $header = 'Authorization: OAuth realm="' . $realm . '"';
   foreach ($params as $k => $v) {
     if (substr($k, 0, 5) == 'oauth') {
       $header .= ',' . rfc3986_encode($k) . '="' . rfc3986_encode($v) . '"';
