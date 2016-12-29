@@ -1,5 +1,8 @@
 OAuth Examples using Yahoo Social APIs
 ---
 
+1.0.1  2016-12-29  Joe Chung
+* Change Yahoo Social API endpoint scheme from http to https.
+
 1.0.0  2010-02-19  Joe Chung
 * Initial Release
