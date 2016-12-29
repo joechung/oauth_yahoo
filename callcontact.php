@@ -3,9 +3,9 @@ require 'globals.php';
 require 'oauth_helper.php';
 
 // Fill in the next 3 variables.
-$guid='X4323GFSERGF43454GSFGBCCB3';
-$access_token='A=KdfjadlskfjSDFGG.ertklsioerkjhSDFGkjlhasdfik345k34897SDFgklhe4kljhdSGKLjhsdfg.mcxkhdfSGKHsdfgkjeroI.REsdFGSFDg.sdfgiwresdfgsfhg.gh.tyu.ghfj.dfghfsdg.fgsdg.sdfgiretkjsfdgkjlhertiuysdfgkjhsdfgkljertkjhsdfguyert8743508972345lkjhsdfi8g89sdfg89sdfg908sdfg897sdfg8sdfg734jk25kljhwdkjlhsdfgkjlhsfdgkjlhsdfgjkhsdfgkjhsfdgiuywert87425ksdkjhlsdfgkjlhsdfgjklcxbm.cxvb.asfdkljadsflk.jasldkj3452387wert98sdfg8sdfg897sdfg890sdfgpoiret.lsdfgkljsdfgiwret_sfgkjhmnsdfgjkcvbmsdfglkjhewrtiusdfgjkhsdfgiuret87245lkjhdsfg.mnvbkisdfwertrwt.42534wertwgsdfg.cxvbsfdgsdfg.rwetwert.452435wertwretwer.wertwergtsdfgsdfg.sdfgsdfgrewtwret4252345wtdfgsdfg.sdfgsdfgsdfgewrtwert23452345wertwgsdfgfdrtyfhdgsdfgsdfgrewtwertsdfgdfgrt2rwersdfgdfgretrwefgrwtwertwertweryrwywertwertfsgfsdgsdferw3452twresdfgwretwert45wrtertrtg-';
-$access_token_secret='o2345w980945353478594867g3454l45lk324wrd';
+$guid='REPLACE_ME';
+$access_token='REPLACE_ME';
+$access_token_secret='REPLACE_ME';
 
 // Call Contact API
 $retarr = callcontact(OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET,
@@ -30,7 +30,7 @@ function callcontact($consumer_key, $consumer_secret, $guid, $access_token, $acc
   $retarr = array();  // return value
   $response = array();
 
-  $url = 'http://social.yahooapis.com/v1/user/' . $guid . '/contacts;count=5';
+  $url = 'https://social.yahooapis.com/v1/user/' . $guid . '/contacts;count=5';
   $params['format'] = 'json';
   $params['view'] = 'compact';
   $params['oauth_version'] = '1.0';
@@ -60,12 +60,12 @@ function callcontact($consumer_key, $consumer_secret, $guid, $access_token, $acc
     logit("callcontact:INFO:request_url:$request_url");
     logit("callcontact:INFO:post_body:$query_parameter_string");
     $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-    $response = do_post($request_url, $query_parameter_string, 80, $headers);
+    $response = do_post($request_url, $query_parameter_string, 443, $headers);
   } else {
     $request_url = $url . ($query_parameter_string ?
                            ('?' . $query_parameter_string) : '' );
     logit("callcontact:INFO:request_url:$request_url");
-    $response = do_get($request_url, 80, $headers);
+    $response = do_get($request_url, 443, $headers);
   }
 
   // extract successful response
